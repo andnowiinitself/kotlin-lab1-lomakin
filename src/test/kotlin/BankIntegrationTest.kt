@@ -28,7 +28,7 @@ class BankIntegrationTest {
     fun setup() {
         postgres.start()
 
-        DatabaseFactory.init(
+        DatabaseFactory.initTest(
             url = postgres.jdbcUrl,
             driver = "org.postgresql.Driver",
             user = postgres.username,
@@ -62,7 +62,7 @@ class BankIntegrationTest {
         val all = Bank.getAllAccounts().toMap()
         val total = all.values.sum()
 
-        // проверяем, что деньги не "потерялись"
+        // проверяем, что деньги не потерялись
         Assertions.assertEquals(1500.0, total, 0.001)
     }
 }
