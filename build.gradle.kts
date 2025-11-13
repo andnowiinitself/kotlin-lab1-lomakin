@@ -18,6 +18,9 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:0.52.0")
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("com.zaxxer:HikariCP:5.1.0")
+    // логгирование
+    implementation("org.slf4j:slf4j-api:2.0.16")
+    implementation("ch.qos.logback:logback-classic:1.5.12")
     // тесты и testcontainers
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
