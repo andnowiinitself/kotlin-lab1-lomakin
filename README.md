@@ -14,25 +14,9 @@
 
 ## Требования и ограничения
 
-**Инкапсуляция:**
-- Баланс счёта — `private var`
-- История транзакций — приватная
-- Доступ к балансу только через публичные методы
-
-**Валидация:**
-- Начальный баланс ≥ 0
-- Суммы операций > 0
-- Недостаточно средств → `InsufficientFundsException`
-
-**Атомарность операций:**
-- `transfer()` должен быть атомарным: либо обе операции (withdraw + deposit), либо ничего
-- При исключении состояние счетов не меняется
-- Обработка несуществующих счетов через nullable типы
-
-**Отчётность:**
-- `getStatement()` формирует строку через `StringBuffer`
-- Включает текущий баланс и историю всех транзакций
-- Формат произвольный, но читаемый
+postgresql в docker compose, блокировки на уровне бд,
+тесты через TestContainers, получение TXT и PDF в
+getStatement, ну и чтоб работало хз
 
 ## Как запустить
 
@@ -47,26 +31,38 @@ java -jar Main.jar
 ## Примеры использования
 
 ```kotlin
-fun main(){
+fun main() {
+    DatabaseFactory.init()
+
+    transaction {
+        SchemaUtils.create(Accounts, Transactions)
+    }
+
+    val accountService = Account()
+
+    println("Creating accounts...")
     val acc1 = Bank.createAccount(1000.0)
     val acc2 = Bank.createAccount(500.0)
+    println("Accounts created: $acc1 and $acc2")
 
-    acc1.deposit(200.0, "Salary")
-    acc1.withdraw(50.0, "Groceries")
+    println("Depositing 200.0 to account $acc1")
+    accountService.deposit(acc1, 200.0)
 
-    Bank.transfer(acc1.accountNumber, acc2.accountNumber, 300.0)
-//    Transferred 300.0 from acc1 to acc2
+    println("Transferring 300.0 from $acc1 to $acc2")
+    Bank.transfer(acc1, acc2, 300.0)
 
-    println(acc1.getStatement())
-//    === Account statement for KBA№1000000 ===
-//    Current balance: 850.0
-//
-//    Transaction history:
-//    Type: Deposit | Description: Salary | Amount: 200.0 | 2025-10-17T23:38:48.415
-//    ...
+    println("\nAll accounts:")
+    Bank.getAllAccounts().forEach { (id, balance) ->
+        println("Account #$id | Balance: $balance")
+    }
+
+    println("\nStatements:")
+    println(accountService.getStatement(acc1))
+    println(accountService.getStatement(acc2, StatementFormat.PDF))
 }
 ```
 
 ## Использованные технологии
 
-kotlin 2.2.0
+kotlin 2.2.0, миллион dependency в build.gradle.kts
+и llm'ки
